@@ -32,6 +32,7 @@ void AddEditDialog::validateAndAccept() {
     QString name = ui->lineEdit->text();
     QVector<MusicTrack *> tracks;
 
+
     for (int i = 0; i < ui->listWidget->count(); ++i) {
         QListWidgetItem *item = ui->listWidget->item(i);
         QString trackInfo = item->text();
@@ -43,15 +44,16 @@ void AddEditDialog::validateAndAccept() {
             tracks.append(new MusicTrack(match.captured(1), match.captured(2), match.captured(3).toDouble(), match.captured(4)));
         }
     }
-
-    emit playlistCreated(name, tracks);
+    int year = ui->spinBox->value();
+    emit playlistCreated(name, tracks, year);
 
     QDialog::accept();
 }
 
 //Чето да
-void AddEditDialog::setPlaylistData(const QString &name, const QVector<MusicTrack *> &tracks) {
+void AddEditDialog::setPlaylistData(const QString &name, const QVector<MusicTrack *> &tracks, int year) {
     ui->lineEdit->setText(name);
+    ui->spinBox->setValue(year);
     ui->listWidget->clear();
 
     for (auto track : tracks) {
@@ -61,7 +63,9 @@ void AddEditDialog::setPlaylistData(const QString &name, const QVector<MusicTrac
         ui->listWidget->addItem(trackInfo);
     }
 }
-
+int AddEditDialog::getYear() const {
+    return ui->spinBox->value();
+}
 
 //Добавить
 void AddEditDialog::on_pushButton_clicked()
@@ -93,7 +97,6 @@ void AddEditDialog::on_pushButton_3_clicked()
         return;
     }
 
-
     QString trackInfo = selectedItem->text();
     QRegularExpression regex(R"((.+) - (.+) \(([\d.]+) мин\) \[(.+)\])");
     QRegularExpressionMatch match = regex.match(trackInfo);
@@ -120,7 +123,37 @@ void AddEditDialog::on_pushButton_3_clicked()
         selectedItem->setText(title + " - " + artist + " (" + QString::number(duration) + " мин) [" + genre + "]");
     }
 }
+void AddEditDialog::accept()
+{
+    QString name = ui->lineEdit->text();
+    int year = ui->spinBox->value();
+    QVector<MusicTrack *> tracks;
 
+    for (int i = 0; i < ui->listWidget->count(); ++i) {
+        QListWidgetItem *item = ui->listWidget->item(i);
+        QString trackInfo = item->text();
+
+        QRegularExpression regex(R"((.+) - (.+) \(([\d.]+) мин\) \[(.+)\])");
+        QRegularExpressionMatch match = regex.match(trackInfo);
+
+        if (match.hasMatch()) {
+            QString title = match.captured(1);
+            QString artist = match.captured(2);
+            double duration = match.captured(3).toDouble();
+            QString genre = match.captured(4);
+
+            tracks.append(new MusicTrack(title, artist, duration, genre));
+        }
+    }
+
+    if (currentPlaylistItem) {
+        emit playlistEdited(currentPlaylistItem, name, tracks, year);
+    } else {
+        emit playlistCreated(name, tracks, year);
+    }
+
+    QDialog::accept();
+}
 //Удалить
 void AddEditDialog::on_pushButton_2_clicked()
 {

@@ -22,6 +22,7 @@ public:
     virtual QString getArtist() const { return _artist; }
 
     virtual ~AbstractTrack() {}
+friend class tst_MainWindow;
 };
 
 class MusicTrack : public AbstractTrack

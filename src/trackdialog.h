@@ -29,8 +29,11 @@ public:
 private slots:
     void validateAndAccept();
 
+    void on_spinDuration_valueChanged(double arg1);
+
 private:
     Ui::TrackDialog *ui;
+friend class tst_MainWindow;
 };
 
 #endif

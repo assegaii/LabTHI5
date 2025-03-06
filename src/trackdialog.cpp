@@ -66,3 +66,17 @@ void TrackDialog::setGenre(const QString &genre)
 {
     ui->lineGenre->setText(genre);
 }
+
+void TrackDialog::on_spinDuration_valueChanged(double value)
+{
+    int minutes = static_cast<int>(value);
+    int seconds = static_cast<int>((value - minutes) * 100);
+    if (seconds >= 60) {
+        minutes += seconds / 60;
+        seconds = seconds % 60;
+
+
+        ui->spinDuration->setValue(minutes + seconds / 100.0);
+    }
+}
+
